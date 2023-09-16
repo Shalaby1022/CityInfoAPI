@@ -1,3 +1,4 @@
+using CityInfoAPI.Services;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace CityInfoAPI
@@ -26,6 +27,20 @@ namespace CityInfoAPI
 
             // for detching and uploading a file ( extension ).
             builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+
+
+            //
+            builder.Services.AddSingleton<CitiesDataStore>();
+
+
+            //
+            #if DEBUG
+            builder.Services.AddTransient<IMailService , LocalMailService>();
+            #else
+            builder.Services.AddTransient<IMailService , CloudMailService>();
+            #endif
+
+
 
             var app = builder.Build();
 
