@@ -1,5 +1,7 @@
+using CityInfoAPI.Data;
 using CityInfoAPI.Services;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace CityInfoAPI
 {
@@ -27,14 +29,22 @@ namespace CityInfoAPI
 
             // for detching and uploading a file ( extension ).
             builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+            builder.Services.AddScoped<CPDbContext>();
 
 
             //
             builder.Services.AddSingleton<CitiesDataStore>();
 
+            // Adding DbContext and Sql Server 
+            builder.Services.AddDbContext<CPDbContext>(options => {
+                options.UseSqlServer(
+                    builder.Configuration["ConnectionStrings:CitiesAppInfoDataBaseConnection"]);
+            });
+
+
 
             //
-            #if DEBUG
+#if DEBUG
             builder.Services.AddTransient<IMailService , LocalMailService>();
             #else
             builder.Services.AddTransient<IMailService , CloudMailService>();
@@ -60,6 +70,8 @@ namespace CityInfoAPI
             {
                 endpoints.MapControllers();
             });
+
+            
 
             app.Run();
         }
