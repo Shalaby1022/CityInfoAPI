@@ -1,4 +1,6 @@
-﻿namespace CityInfoAPI.Services
+﻿using CityInfoAPI.Data.Interfaces;
+
+namespace CityInfoAPI.Services
 {
     public class LocalMailService : IMailService
     {

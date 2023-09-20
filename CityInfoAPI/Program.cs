@@ -1,4 +1,6 @@
 using CityInfoAPI.Data;
+using CityInfoAPI.Data.Interfaces;
+using CityInfoAPI.Repositories;
 using CityInfoAPI.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +36,8 @@ namespace CityInfoAPI
 
             //
             builder.Services.AddSingleton<CitiesDataStore>();
+            builder.Services.AddScoped<ICityInfoRepository , CityInfoRepository>();
+
 
             // Adding DbContext and Sql Server 
             builder.Services.AddDbContext<CPDbContext>(options => {
@@ -44,12 +48,14 @@ namespace CityInfoAPI
 
 
             //
-#if DEBUG
+            #if DEBUG
             builder.Services.AddTransient<IMailService , LocalMailService>();
             #else
             builder.Services.AddTransient<IMailService , CloudMailService>();
             #endif
 
+            //register AutoMapper 
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
             var app = builder.Build();
