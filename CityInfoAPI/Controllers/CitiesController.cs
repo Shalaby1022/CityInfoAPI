@@ -1,4 +1,7 @@
-﻿using CityInfoAPI.Models;
+﻿using AutoMapper;
+using CityInfoAPI.Data.Interfaces;
+using CityInfoAPI.Entities;
+using CityInfoAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
 
@@ -8,33 +11,45 @@ namespace CityInfoAPI.Controllers
     [ApiController]
     public class CitiesController : ControllerBase
     {
-        private readonly CitiesDataStore _citiesDataStore;
+       
+        private readonly ICityInfoRepository _cityInfoRepository;
+        private readonly IMapper _mapper;
 
-        public CitiesController(CitiesDataStore citiesDataStore )
+        public CitiesController(ICityInfoRepository cityInfoRepository , IMapper mapper )
         {
-            _citiesDataStore = citiesDataStore;
+          
+            _cityInfoRepository = cityInfoRepository;
+            _mapper = mapper;
         }
 
 
         [HttpGet]
-        public ActionResult<CityDto> GetCitites()
+        public async Task<ActionResult<IEnumerable<CityWithoutPointofinteresrsDTO>>> GetCitites()
         {
-            return Ok(_citiesDataStore.Cities);
+            var citiesall = await _cityInfoRepository.GetCitiesAsync();
+
+            // using auto mapper here.
+            return Ok(_mapper.Map<IEnumerable<CityWithoutPointofinteresrsDTO>>(citiesall));
+
         }
 
         [HttpGet("{id}")]
-        public ActionResult<CityDto> GetOneCity(int id)
+        public async Task<IActionResult> GetOneCity(int id , bool Includepointofinterest = true)
         {
-            var citytoreturn = _citiesDataStore.Cities.FirstOrDefault(r=>r.Id == id);
+            var citytoreturn = await _cityInfoRepository.GetCityByIdAsync(id , Includepointofinterest);
             if(citytoreturn == null)
             {
                 return NotFound();
             }
-            else
+            
+            if(Includepointofinterest) 
             {
-                return Ok(citytoreturn);
+             return Ok(_mapper.Map<CityDto>(citytoreturn));
             }
+
+            return Ok(_mapper.Map<CityWithoutPointofinteresrsDTO>(citytoreturn));
         }
+
 
     }
 }
